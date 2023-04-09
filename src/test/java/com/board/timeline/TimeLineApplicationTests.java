@@ -1,10 +1,10 @@
-package com.sparta.week03;
+package com.board.timeline;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class Week03ApplicationTests {
+class TimeLineApplicationTests {
 
     @Test
     void contextLoads() {

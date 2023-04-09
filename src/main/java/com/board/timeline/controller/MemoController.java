@@ -1,12 +1,13 @@
-package com.sparta.week03.controller;
+package com.board.timeline.controller;
 
-import com.sparta.week03.domain.Memo;
-import com.sparta.week03.domain.MemoRepository;
-import com.sparta.week03.domain.MemoRequestDto;
-import com.sparta.week03.service.MemoService;
+import com.board.timeline.domain.Memo;
+import com.board.timeline.domain.MemoRepository;
+import com.board.timeline.domain.MemoRequestDto;
+import com.board.timeline.service.MemoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor //(** final로 선언된 필드에 대한 객체를 생성해서 자동주입해줌)
@@ -24,8 +25,14 @@ public class MemoController { //(** @RestController는 @Controller와 @ResponseB
 
     @GetMapping("/api/memos")
     public List<Memo> getMemos() {
-        return memoRepository.findAllByOrderByModifiedAtDesc(); // (**MemoRepository에서 모든 Memo를 찾는데, 수정된날짜를 기준으로 내림차순(최신순)으로 정렬해서 다 찾아줌)
-    }                                                           //(**찾아온 모든 Memo를 List에 담아서 리턴)
+        //return memoRepository.findAllByOrderByModifiedAtDesc(); // (**MemoRepository에서 모든 Memo를 찾는데, 수정된날짜를 기준으로 내림차순(최신순)으로 정렬해서 다 찾아줌)
+                                                                  //(**찾아온 모든 Memo를 List에 담아서 리턴)
+
+        // 타임라인서비스가 불러오는 메모 목록의 시간을 조회 시간으로 부터 24시간 이내로만 할때
+        LocalDateTime start = LocalDateTime.now().minusDays(1);
+        LocalDateTime end = LocalDateTime.now();
+        return memoRepository.findAllByModifiedAtBetweenOrderByModifiedAtDesc(start,end);
+    }
 
     @DeleteMapping("/api/memos/{id}")
     public Long deleteMemo(@PathVariable Long id) { //(**경로변수로 삭제할 Memo의 id를 받아옴)

@@ -1,8 +1,8 @@
-package com.sparta.week03.service;
+package com.board.timeline.service;
 
-import com.sparta.week03.domain.Memo;
-import com.sparta.week03.domain.MemoRepository;
-import com.sparta.week03.domain.MemoRequestDto;
+import com.board.timeline.domain.Memo;
+import com.board.timeline.domain.MemoRepository;
+import com.board.timeline.domain.MemoRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

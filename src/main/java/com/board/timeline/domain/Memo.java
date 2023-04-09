@@ -1,4 +1,4 @@
-package com.sparta.week03.domain;
+package com.board.timeline.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

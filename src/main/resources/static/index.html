@@ -49,7 +49,7 @@
             top: 0px;
             width: 100%;
             height: 428px;
-            background-color: #339af0;
+            background-color: #808080; <!--#339af0;-->
         }
 
         .background-body {
@@ -208,20 +208,20 @@
     <script>
         // 미리 작성된 영역 - 수정하지 않으셔도 됩니다.
         // 사용자가 내용을 올바르게 입력하였는지 확인합니다.
-        function isValidContents(contents) { //전달받은 데이터(contents)를 파라미터로 받는다.
-            if (contents == '') {
+        function isValidContents(contents) { //**전달받은 데이터(contents)를 파라미터로 받는다.
+            if (contents == '') { //**사용자가 입력칸(id가 contents)에 아무것도 입력안하면 alert 발생
                 alert('내용을 입력해주세요');
                 return false;
             }
-            if (contents.trim().length > 140) { //앞뒤 공백 제거한후 데이터(contents)가 140자 초과하면 알럿발생
+            if (contents.trim().length > 140) { //**앞뒤 공백 제거한후 데이터(contents)가 140자 초과하면 알럿발생
                 alert('공백 포함 140자 이하로 입력해주세요');
                 return false;
             }
-            return true;
+            return true; //**(무엇이든 입력하든, 또는 140자 이하로 입력하면 true를 반환)
         }
 
         // 익명의 username을 만듭니다.
-        function genRandomName(length) { // 입력받은 length 길이만큼 임의의 문자열을 만들어서 반환
+        function genRandomName(length) { // **입력받은 length 길이만큼 임의의 문자열을 만들어서 반환
             let result = '';
             let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
             let charactersLength = characters.length;
@@ -262,51 +262,88 @@
         // 여기서부터 코드를 작성해주시면 됩니다.
 
         $(document).ready(function () {
-            // $(document).ready(function () : HTML 문서를 로드할 때마다(=새로고침할때마다) 실행합니다.
+            //** $(document).ready(function () : HTML 문서를 로드할 때마다(=새로고침할때마다,localhost:8080에 접속할때마다) 실행합니다.
             getMessages();
         })
 
         // 메모를 불러와서 보여줍니다.
         function getMessages() {
             // 1. 기존 메모 내용을 지웁니다.
-            $('#cards-box').empty(); //id가 cards-box인것을 다 지운다.
-            // 2. 메모 목록을 불러오는것. 메모 목록을 요청하는것. 메모 목록을 불러와서 HTML로 붙입니다.
+            $('#cards-box').empty(); //(** id가 cards-box인것을 다 지운다.)
+            // 2. (**메모 목록을 불러오는것. 메모 목록을 요청하는것이다.) 메모 목록을 불러와서 HTML로 붙입니다.
             $.ajax({
                 type: 'GET',
                 url: '/api/memos',
-                success: function (response) { // 서버가 성공적으로 응답을 한다면 서버에서 준 결과(응답값)를 response라는 변수에 담는다
-                    console.log(response);
+                success: function (response) { // (** 서버가 성공적으로 응답을 한다면 서버에서 준 결과(응답값,메모목록)를 response라는 변수에 담는다)
+                    for(let i =0; i<response.length; i++) {//(** 메모 목록의 각각의 메모별로 HTML을 만들기 위해 addHTML()을 호출할것임)
+                        let memo = response[i]; //(** 메모 목록에서 하나의 목록을 꺼냄)
+                        let id = memo.id;//(**꺼내온 메모의 id)
+                        let username = memo.username;
+                        let contents = memo.contents;
+                        let modifiedAt = memo.modifiedAt; //(** Timestamped에 있는 modeifiedAt)
+                        addHTML(id,username,contents,modifiedAt);
+                    }
                 }
             })
         }
 
         // 메모 하나를 HTML로 만들어서 body 태그 내 원하는 곳에 붙입니다.
-        function addHTML(id, username, contents, modifiedAt) {
-            // 1. HTML 태그를 만듭니다.
-            // 2. #cards-box 에 HTML을 붙인다.
+        function addHTML(id, username, contents, modifiedAt) { //(** 메모 목록의 각각의 메모별로 HTML을 만들기 위해 addHTML()을 호출할것임)
+            // 1. HTML 태그를 만듭니다. ** 값(HTML)을 tempHtml 변수에 대입한다. 값은 '(백틱)으로 표현했는데, addHtml의 매개값을 ${}에 대입시켜주기위해)
+            let tempHtml =
+                        `<div class="card">
+                         <!-- date/username 영역 -->
+                         <div class="metadata">
+                         <div class="date">
+                                 ${modifiedAt}
+                         </div>
+                         <div id="${id}-username" class="username">
+                                 ${username} <!-- ** 나중에 $(\`#${id}-username\`).text()를 통해 ${username}에 저장된값을 가져올수있다.  -->
+                         </div>
+                         </div>
+                         <!-- contents 조회/수정 영역-->
+                          <div class="contents">
+                         <div id="${id}-contents" class="text"> <!-- ** 등록되어있는 메모를 조회할때의 메모 영역의 id -->
+                        ${contents}
+                         </div>
+                        <div id="${id}-editarea" class="edit"> <!-- ** 등록되어있는 메모를 수정할때 메모 영역 전체의 id는 editarea이고 텍스트만 입력하는 영역은 textarea이다. -->
+                        <textarea id="${id}-textarea" class="te-edit" name="" id="" cols="30" rows="5"></textarea>
+                        </div>
+                          </div>
+                     <!-- 버튼 영역-->
+                     <div class="footer">
+                          <img id="${id}-edit" class="icon-start-edit" src="images/edit.png" alt="" onclick="editPost('${id}')">
+                          <img id="${id}-delete" class="icon-delete" src="images/delete.png" alt="" onclick="deleteOne('${id}')">
+                          <img id="${id}-submit" class="icon-end-edit" src="images/done.png" alt="" onclick="submitEdit('${id}')">
+                     </div>
+                     </div>`;
+                    // 2 . #cards-box 에 생성한 메모의 HTML을 붙인다.
+                    $('#cards-box').append(tempHtml);
         }
+
+
 
         // 메모를 생성합니다.
         function writePost() {
             // 1. 작성한 메모를 불러옵니다.
-            let contents = $('#contents').val(); //jQuery, 데이터(contents)를 입력받음.
+            let contents = $('#contents').val(); //$() = jQuery, 클라이언트가 화면의 입력박스에서 입력한 데이터(개발자 모드 html 코드로 봤을때 입력박스의 id가 contents)를 받음(=.val()의 역할).
             // 2. 작성한 메모가 올바른지 isValidContents 함수를 통해 확인합니다.
             if (isValidContents(contents) == false) {
-                return; //false가 나오면 아래 내용을 실행하지않고 writePost() 종료
+                return; //**false가 나오면 아래 내용을 실행하지않고 writePost() 종료
             }
-            // 3. genRandomName 함수를 통해 익명의 username을 만듭니다.
-            let username = genRandomName(10); //10자리의 임의의 문자열을 반환
-            // 4. 전달할 data JSON으로 만듭니다.
+            // 3. genRandomName 함수를 통해 익명의 username을 만듭니다. (**메모를 생성하려면 username과 contents내용이 있어야한다)
+            let username = genRandomName(10); //**10자리의 임의의 문자열을 반환
+            // 4. 전달할 data를 JSON 형식으로 만듭니다.(**입력받은 contents, 만든username을 통해 json 형식으로 만듬)
             let data = {'username': username, 'contents': contents};
             // 5. POST /api/memos 에 data를 전달합니다.
-            $.ajax({ //jQuery를 이용한다는 의미임. ARC를 통해서 데이터를 생성한것을 코드로 하는것임
-                type: "POST",
-                url: "/api/memos",
-                contentType: "application/json", // JSON 형식으로 전달함을 알리기
-                data: JSON.stringify(data),    //data는 ARC에서의 Body 내용을 의미함. JSON.stringify(data) 는 data값을 JSON문자열로 변환한다.
-                success: function (response) { // 서버가 성공적으로 응답을 한다면 서버에서 준 결과를 response라는 변수에 담는다
+            $.ajax({ //(** $.jax = jQuery를 이용한다는 의미임. 서버에 요청을 보낼때, ARC를 통해서 데이터를 적어서 요청한것을 코드로 하는것임)
+                type: "POST", //(**POST방식으로 서버에 요청하겠다)
+                url: "/api/memos", //(**localhost:8080은 쓸 필요없다. jQuery가 알아서 다 해줌)
+                contentType: "application/json", // (**JSON 형식으로 전달함을 알리기)
+                data: JSON.stringify(data),    //(** data는 ARC에서의 Body 내용을 의미함. JSON.stringify(data) 는 jSON형식의 data값을 문자열로 변환한다.)
+                success: function (response) { // (**서버가 성공적으로 응답을 한다면 서버에서 준 결과를 response라는 변수에 담는다)
                     alert('메시지가 성공적으로 작성되었습니다.');
-                    window.location.reload(); //서버가 성공적으로 응답을 한다면 알럿을 발생하고, 새로고침을 한다.
+                    window.location.reload(); //(** 서버가 성공적으로 응답을 한다면 알럿을 발생하고, 새로고침을 한다.)
                 }
             });
         }
@@ -314,14 +351,37 @@
         // 메모를 수정합니다.
         function submitEdit(id) {
             // 1. 작성 대상 메모의 username과 contents 를 확인합니다.
+            let username = $(`#${id}-username`).text().trim(); // ** 커서가 깜빡깜빡 거릴때(입력하고있을때)의 값을 가져오는게 아니라,텍스트로 박혀있는 값(이미 있는 값)을 가져올때는 text()로 가져온다.
+            let contents = $(`#${id}-textarea`).val().trim(); // ** 텍스트만 입력하는 영역에서 값을 가져오면되므로 textarea에서 가져오고, 메모를 수정할때처럼 커서가 깜빡깜빡 거리고 있을때(입력하고있을때) 값을 가져올때는 .val()로 가져온다.
             // 2. 작성한 메모가 올바른지 isValidContents 함수를 통해 확인합니다.
-            // 3. 전달할 data JSON으로 만듭니다.
+            if (isValidContents(contents) == false) {
+                return; // ** 메모가 올바르지 않으면 아래절차를 더 수행하지않고 submitEdit()를 종료
+            }
+            // 3. ** 전달할 data를 JSON 형식으로 만듭니다.
+            let data = {'username': username, 'contents': contents};
             // 4. PUT /api/memos/{id} 에 data를 전달합니다.
+            $.ajax({ //(** $.jax = jQuery를 이용한다는 의미임. 서버에 요청을 보낼때, ARC를 통해서 데이터를 적어서 요청한것을 코드로 하는것임)
+                type: "PUT",
+                url: `/api/memos/${id}`,
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (response) {
+                    alert('메시지 변경에 성공하였습니다.');
+                    window.location.reload();
+                }
+            });
         }
 
         // 메모를 삭제합니다.
-        function deleteOne(id) {
-            // 1. DELETE /api/memos/{id} 에 요청해서 메모를 삭제합니다.
+        function deleteOne(id) { // ** 1. DELETE /api/memos/{id} 에 요청해서 메모를 삭제합니다.
+            $.ajax({ //(** $.jax = jQuery를 이용한다는 의미임. 서버에 요청을 보낼때, ARC를 통해서 데이터를 적어서 요청한것을 코드로 하는것임)
+                type: "DELETE",
+                url: `/api/memos/${id}`,
+                success: function (response) {
+                    alert('메시지 삭제에 성공하였습니다.');
+                    window.location.reload();
+                }
+            })
         }
     </script>
 </head>
